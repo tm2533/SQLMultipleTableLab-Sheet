@@ -54,11 +54,48 @@ HAVING total_n_items_delivered >= 10
 ORDER BY total_n_items_delivered DESC, S.SupplierName;
 
 -- 8. Count the number of direct employees of each manager
-SELECT *
-FROM Employee;
+SELECT * FROM Employee;
+
+SELECT E1.BossNumber, E2.EmployeeName AS BossName, COUNT(E1.EmployeeName) as n_direct_employees
+FROM Employee AS E1
+LEFT JOIN Employee AS E2
+    ON E1.BossNumber = E2.EmployeeNumber
+WHERE E1.BossNumber != 0
+GROUP BY E1.BossNumber, E2.EmployeeName
+ORDER BY n_direct_employees DESC;
 
 -- 9. Find, for each department that sells items of type 'E' the average salary of the employees.
+SELECT DepartmentName, ROUND(AVG(EmployeeSalary), 2) AS avg_salary
+FROM Employee
+WHERE DepartmentName IN (
+    -- Department names that sell items of type 'E'
+    SELECT DISTINCT DepartmentName
+    FROM Sale
+    WHERE ItemName IN (
+        SELECT DISTINCT ItemName FROM Item
+        WHERE ItemType = 'E'
+    )
+)
+GROUP BY DepartmentName
+ORDER BY avg_salary DESC;
 
 -- 10. Find the total number of items of type 'E' sold by departments on the second floor
+SELECT SUM(S.SaleQuantity) AS total_n_items_sold -- S.*, I.ItemType, D.DepartmentFloor
+FROM Sale AS S
+LEFT JOIN Item AS I
+    ON S.ItemName = I.ItemName
+LEFT JOIN Department AS D
+    ON S.DepartmentName = D.DepartmentName
+WHERE I.ItemType = 'E' 
+    AND D.DepartmentFloor = 2;
 
 -- 11. What is the average delivery quantity of items of type 'N' delivered by each company?
+SELECT S.SupplierName, AVG(D.DeliveryQuantity) AS avg_delivery_quantity 
+FROM Delivery AS D
+LEFT JOIN Item AS I
+    ON D.ItemName = I.ItemName
+LEFT JOIN Supplier AS S
+    ON D.SupplierNumber = S.SupplierNumber
+WHERE I.ItemType = 'N'
+GROUP BY S.SupplierName
+ORDER BY avg_delivery_quantity DESC;
