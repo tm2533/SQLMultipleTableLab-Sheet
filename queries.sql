@@ -1,7 +1,5 @@
 -- Some queries to try
 -- 1. What are the names of employees in the Marketing Department?
-SELECT DISTINCT DepartmentName FROM Employee;
-
 SELECT EmployeeName FROM Employee
 WHERE DepartmentName = 'Marketing'
 ORDER BY EmployeeName;
